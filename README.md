@@ -127,7 +127,7 @@ FYI: The more hours you add, the longer the member has to wait before working ag
 
 # Extra Info
 ### Usage
-I here by allow for the use of this cog within discord bot, and only discord bots. I am not resposible for this cog causing problems on your computer, internet, or the bot itself. If said bot is a self-bot, the commands are only allowed to be used by the owner, and only the owner. If said bot is a public bot, the bot must be a bot account using [Discord's API](https://discordapp.com/developers). I will not allow and not tell anyone to make their self-bot public. (If I do, slap me)
+I here by allow for the use of this cog within discord bots, and only discord bots. I am not resposible for this cog causing problems on your computer, internet, or the bot itself. If said bot is a self-bot, the commands are only allowed to be used by the owner, and only the owner. If said bot is a public bot, the bot must be a bot account using [Discord's API](https://discordapp.com/developers). I will not allow and not tell anyone to make their self-bot public. (If I do, slap me)
 
 ### Requirments
 This cogs uses:
@@ -144,7 +144,7 @@ This cogs uses:
 
 ### Sources
 All VA-11 Hall-A Information is from [Wikia](http://va11halla.wikia.com/wiki/VA-11_HALL-A_Wikia)
-The Idea came from a friend of mine, from Discord, working on his own version on his own bot.
+The Idea came from a friend of mine on Discord who is working on his own version on his own bot.
 
 ### Thanks
 Of course, Thanks [Era The Monologuer (09eragera09)](https://github.com/09eragera09) for the Idea.  
