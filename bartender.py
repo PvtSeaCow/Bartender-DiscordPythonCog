@@ -24,6 +24,7 @@ class bartender:
             self.make_files("work")
         self.embed_footer_first = "\"I see this is your first time here, I hope I can be of service!\" (I hope they don't mention the dogshit smell)"
         self.embed_footer_icon = "http://vignette2.wikia.nocookie.net/va11halla/images/1/1b/Jill.png"
+        self.boss_pic = "http://vignette3.wikia.nocookie.net/va11halla/images/2/29/Dana.png"
         with open(self.drinkspath) as data:
             self.drinks = json.load(data)
         flavors = [self.drinks[item]["Flavor"] for item in self.drinks]
@@ -34,10 +35,9 @@ class bartender:
             self.quotes = json.load(data)
         self.greetings = self.quotes["greetings"]
         self.qdrinks = self.quotes["drinks"]
-        self.tut_text = "Hello, Welcome to Va-11 Hall-A. A cyberpunk themed bar.\nJust like any bar, we serve drinks.\n\nEvery Drink is listed under *Drinks*.\nThose drinks have flavors, and are listed under *Drink Flavors*\nEach drink is under a category known as type, listed under *Drink Types*\n\nThere is multiple ways of ordering drinks:\n\t- Ordering from drink name: \n\t\t`cow.bar order Piano Man`\n\t- Ordering a random drink with that flavor: \n\t\t`cow.bar order Sweet`\n\t- Ordering a random drink from their type: \n\t\t`cow.bar order Classy`\n\t- Order a random drink:\n\t\t`cow.bar order`\n\nPlease enjoy your stay!"
+        self.tut_text = "Hello, Welcome to Va-11 Hall-A. A cyberpunk themed bar.\nJust like any bar, we serve drinks.\n\nEvery Drink is listed under *Drinks*.\nThose drinks have flavors, and are listed under *Drink Flavors*\nEach drink is under a category known as type, listed under *Drink Types*\n\nThere is multiple ways of ordering drinks:\n\t- Ordering from drink name: \n\t\t`cow.bar order Piano Man`\n\t- Ordering a random drink with that flavor: \n\t\t`cow.bar order Sweet`\n\t- Ordering a random drink from that type: \n\t\t`cow.bar order Classy`\n\t- Order a random drink:\n\t\t`cow.bar order`\n\nPlease enjoy your stay!"
         self.work_tut_text = "Working in this bar is like working in the outside world; You'll get paid minimum wage per hour for that job. All jobs have minimum and maximum hours, and the amount of hours I'll give you is inbetween that time frame.\n\nWhen your work is done, you'll have to wait a full day plus the amount of hours you worked. Say if you cleaned for 2 hours, you'll have to wait 1 day and 2 hours before requesting for work again.\n\nAlso, if I see you doing a better than average at what I gave you, I'll might even give you extra money."
         self.embed_color = discord.Color(value=8600006)
-        self.boss_pic = "http://vignette3.wikia.nocookie.net/va11halla/images/2/29/Dana.png"
 
     def make_files(self, filetype):
         if filetype == "drinks":
@@ -62,7 +62,7 @@ class bartender:
         path = a.fpath
         with open(path) as f:
             data = json.load(f)
-        embed = discord.Embed(title="Welcome to the bar. What can I get you?", color=self.embed_color, description="Please use the categories or types of drinks below. Know something you like, tell me and I'll make it.")
+        embed = discord.Embed(title="Welcome to the bar. What can I get you?", color=self.embed_color, description="Please use the categories or types of drinks below. Know something you like, tell me and I'll make it.\n\nHelp: `cow.bar help`")
         footer = random.choice(self.greetings)
         embed.set_thumbnail(url=self.embed_footer_icon)
         if a.firsttime:
@@ -76,6 +76,13 @@ class bartender:
         embed.add_field(name="Drink Flavors:", value=str(", ".join(self.flavors)).title(), inline=False)
         embed.add_field(name="Drinks:", value=str(", ".join(self.drinks)).title(), inline=False)
         msg = await self.bot.say(embed=embed)
+
+    @bar.command(name="reload")
+    async def reload_drinks(self):
+        with open(self.drinkspath) as f:
+            drinks = json.load(f)
+        self.drinks = drinks
+        pass
 
     @bar.command(name="help", pass_context=True)
     async def bar_help(self):
@@ -147,12 +154,22 @@ class bartender:
                 bought_text = qdrink
 
             embed = discord.Embed(title=discord.Embed.Empty, color=self.embed_color)
-            embed.set_author(name="Drink Requested: "+rawdrink.title(), url="http://va11halla.wikia.com/wiki/"+name.replace(" ", "_"), icon_url=utils.get_drink_icon(name))
+            icon = utils.get_drink_icon(name)
+            url = "http://va11halla.wikia.com/wiki/"+name.replace(" ", "_")
+            if not icon:
+                url = discord.Embed.Empty
+                try:
+                    icon = self.drinks[name]["custom_icon"]
+                except KeyError:
+                    icon = ""
+                except:
+                    raise
+            embed.set_author(name="Drink Requested: "+rawdrink.title(), url=url, icon_url=icon)
             embed.set_thumbnail(url=self.embed_footer_icon)
             if not a.can_buy(dprice):
-                embed.add_field(name="Drink Not Bought!", value="You lack the required funds for this drink! You need ${} more!".format(int(int(dprice) - int(account(member).amount))), inline=True)
+                embed.add_field(name="Drink Not Bought!", value="You lack the required funds for this drink! You need ${} more!".format(int(int(dprice) - int(account(member).amount))), inline=False)
             if a.can_buy(dprice):
-                embed.add_field(name="Drink Bought!", value="Money has been deducted from your account!\nYour Original Tab Amount: ${}\nAmount that has been deducted: ${}\nYour New Tab Amount: ${}".format(original_amount, dprice, new_amount), inline=True)
+                embed.add_field(name="Drink Bought!", value="Money has been deducted from your account!\nYour Original Tab Amount: ${}\nAmount that has been deducted: ${}\nYour New Tab Amount: ${}".format(original_amount, dprice, new_amount), inline=False)
             embed.add_field(name="Flavor:", value=dflavor, inline=True)
             embed.add_field(name="Type:", value=dtype, inline=True)
             embed.add_field(name="Price:", value="$"+dprice, inline=True)
@@ -205,14 +222,24 @@ class bartender:
             dflavor = drink["Flavor"]
             dtech = drink["Techniques"]
             dprice = drink["Price"]
+            icon = utils.get_drink_icon(name)
+            url = "http://va11halla.wikia.com/wiki/"+name.replace(" ", "_")
+            if not icon:
+                url = discord.Embed.Empty
+                try:
+                    icon = self.drinks[name]["custom_icon"]
+                except KeyError:
+                    icon = ""
+                except:
+                    raise
 
-            embed = discord.Embed(title="Info for drink: {0}".format(rawdrink.title()), url="http://va11halla.wikia.com/wiki/"+name.replace(" ", "_"), color=self.embed_color, description="*{}*".format(ddesc))
-            embed.set_thumbnail(url=utils.get_drink_icon(name))
+            embed = discord.Embed(title="Info for drink: {0}".format(rawdrink.title()), url=url, color=self.embed_color, description="*{}*".format(ddesc))
+            embed.set_thumbnail(url=icon)
             embed.add_field(name="Flavor:", value=dflavor, inline=True)
             embed.add_field(name="Type:", value=dtype, inline=True)
             embed.add_field(name="Price:", value="$"+dprice, inline=True)
-            embed.add_field(name="Can You Buy?:", value=str(account(ctx.message.author).can_buy(dprice)), inline=True)
-            embed.add_field(name="Techniques:", value=str(", ".join(dtech)).title(), inline=False)
+            #embed.add_field(name="Can You Buy?:", value=str(account(ctx.message.author).can_buy(dprice)), inline=True)
+            embed.add_field(name="Techniques:", value=str(", ".join(dtech)).title(), inline=True)
             await self.bot.say(embed=embed)
 
     @bar.group(aliases=["account"], pass_context=True, invoke_without_command=True)
@@ -224,7 +251,7 @@ class bartender:
         if member != ctx.message.author and utils.is_owner():
             extra = " for member: {0.name}#{0.discriminator} ({0.id})".format(member)
         a = account(member).amount
-        embed = discord.Embed(title="Tab Amount!"+extra, color=self.embed_color, description="This shows your current amount in your tab. With this money you can buy drinks. (More things to buy coming soon)\nTo gain more money, you can work for the bar. (Making it functional soon)")
+        embed = discord.Embed(title="Tab Amount!"+extra, color=self.embed_color, description="This shows your current amount in your tab. With this money you can buy drinks.\nTo gain more money, you can work for the bar. `cow.bar work`")
         embed.set_thumbnail(url=self.embed_footer_icon)
         embed.add_field(name="Amount:",value="${}".format(a))
         footer = random.choice(self.quotes["amount"])
@@ -264,7 +291,7 @@ class bartender:
             embed.set_thumbnail(url=self.boss_pic)
             await self.bot.say(embed=embed)
         elif workType == None or workType.lower() not in work.workTypes:
-            embed = discord.Embed(title="Looking for work!", description="Working allows for you to gain money like the good old days. The Current work you can do is below!\n\nUsage: `cow.bar work (type of work)`")
+            embed = discord.Embed(title="Looking for work!", description="Working allows for you to gain money like the good old days. The Current work you can do is below!\n\nHelp: `cow.bar work help`\nUsage: `cow.bar work (type of work)`")
             workTypes = work.workTypes
             embed.set_thumbnail(url=self.boss_pic)
             if not acc.data["met_boss"]:
@@ -276,7 +303,7 @@ class bartender:
             embed.add_field(name="Types of work you can do:", value=str(", ".join(workTypes)).title(), inline=False)
             if not work.can_work():
                 hoursleft = work.get_hours_left()
-                embed.add_field(name="Hours til you can work again:", value=str(", ".join(workTypes)).title(), inline=False)
+                embed.add_field(name="Hours til you can work again:", value="Less than {}left".format(hoursleft), inline=False)
             for item in workTypes:
                 break
                 desc = work.workdata[item]["desc"]
@@ -501,7 +528,7 @@ class utils(object):
             element = soup.find('img', {"class":"pi-image-thumbnail"})
             url = element["src"]
             return url
-        return discord.Embed.Empty
+        return None
 
     def is_owner_check(message):
         if message.author.id == "105800900521570304":
