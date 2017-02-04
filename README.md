@@ -76,7 +76,8 @@ When you open *drinks.json*, it's fairly simple to understand but I'll explain a
  "Type":"Promo",
  "Techniques":["Mixed"],
  "Ingredients":{"Adelhyde":5,"Bronson Extract":5,"Powdered Delta":2,"Flanergide":3,"Karmotrine":3},
- "Price":"320"
+ "Price":"320",
+ "custom_icon":"<url to icon>" (OPTIONAL)
 }
 ```  
 - `Piano Woman` is obviously the name of the drink. (Make sure the first letter of EACH word is capitalized)
@@ -86,6 +87,7 @@ When you open *drinks.json*, it's fairly simple to understand but I'll explain a
 - `Techniques` are if the drink has certain ways to make them. Drinks can either be `Mixed` or `Blended`, and could also have `Iced` and/or `Aged` (First Letter Capitalized. Also Unused atm.)
 - `Ingredients` are unused and most likely wont be. They are used within VA-11 Hall-A to make the drinks.
 - `Price` is how much is drink.  
+- `custom_icon` is purely optional and is for only custom drinks. No url means No Icon. (OPTIONAL)
 
 ### Quotes
 Quotes are what Jill says in the footer of most embeds with her picture.
@@ -127,10 +129,10 @@ FYI: The more hours you add, the longer the member has to wait before working ag
 
 # Extra Info
 ### Usage
-I here by allow for the use of this cog within discord bots, and only discord bots. I am not resposible for this cog causing problems on your computer, internet, or the bot itself. If said bot is a self-bot, the commands are only allowed to be used by the owner, and only the owner. If said bot is a public bot, the bot must be a bot account using [Discord's API](https://discordapp.com/developers). I will not allow and not tell anyone to make their self-bot public. (If I do, slap me)
+I here by allow for the use of this cog within discord bots, and only discord bots. I am not resposible for this cog causing problems on your computer, internet, or the bot itself. If said bot is a self-bot, the commands are only allowed to be used by the owner, and only the owner. If said bot is a public bot, the bot must be a bot account using [Discord's API](https://discordapp.com/developers). I will not allow and tell anyone to make their self-bot public or semi-public. (If I do, slap me)
 
 ### Requirments
-This cogs uses:
+This cog uses:
 - [discord.py](https://github.com/Rapptz/discord.py)
  - discord.ext.commands
 - asyncio
@@ -143,7 +145,10 @@ This cogs uses:
 - requests
 
 ### Sources
-All VA-11 Hall-A Information is from [Wikia](http://va11halla.wikia.com/wiki/VA-11_HALL-A_Wikia)
+All VA-11 Hall-A Information is from [Wikia](http://va11halla.wikia.com/wiki/VA-11_HALL-A_Wikia)  
+
+I do not own VA-11 Hall-A, I do not and will not tell anyone that I made it. It was made by [Sukeban Games](https://sukebangames.itch.io/) and published by [Ysbryd Games](http://www.ysbryd.net/)
+
 The Idea came from a friend of mine on Discord who is working on his own version on his own bot.
 
 ### Support
