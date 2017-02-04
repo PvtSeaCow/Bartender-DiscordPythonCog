@@ -146,6 +146,9 @@ This cogs uses:
 All VA-11 Hall-A Information is from [Wikia](http://va11halla.wikia.com/wiki/VA-11_HALL-A_Wikia)
 The Idea came from a friend of mine on Discord who is working on his own version on his own bot.
 
+### Support
+If any problems show up, either write an issue on github, or join [Neku's Discord Server](https://www.nekku.me/) and PM me.
+
 ### Thanks
 Of course, Thanks [Era The Monologuer (09eragera09)](https://github.com/09eragera09) for the Idea.  
 Thanks [Neku](https://github.com/NekuNeku) ([website](https://www.nekku.me/)) for allowing me to use his server for testing.  
