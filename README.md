@@ -16,7 +16,7 @@ Info about the cog and how it currently works. (WIP)
 ## First time set-up
 When a member first uses any command, it generates a file for them. If a member uses the main bar command, `<prefix>bar`, Jill will greet them and talk about how ordering works. You can get this help screen back by issuing `<prefix>bar help`
 
-Each Member first starts with $500 and can start working right away.
+Each Member first starts with $1000 and can start working right away.
 
 ## Ordering
 Ordering is quite simple.  
