@@ -2,6 +2,8 @@
 
 # NOTE: THIS IS NOT A BOT. It's a cog, or extention, for discord.py using the ext.commands
 
+## NOTE 2: This Cog is a work-in-progress, this means it isn't finished and means that bugs may arise and cause problems.
+
 # Bartender (AKA. Jill)
 ### About
 Jill is the playable bartender on the game known as VA-11 Hall-A, pronounced as Vall-Halla, which is also the name of the bar she works at. More info on the [steam page](http://store.steampowered.com/app/447530/ "VA-11 Hall-A")
