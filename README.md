@@ -146,6 +146,13 @@ This cog uses:
 - [BeautifulSoup4](https://www.crummy.com/software/BeautifulSoup/)
 - [requests](http://docs.python-requests.org/en/master/)
 
+### Checklist
+- ~~Make the basic system~~
+- ~~Add the drinks~~
+- ~~Overinflated Currency~~
+- ~~Jobs so that people dont collect massive debt~~
+- Add some beats
+
 ### Sources
 All VA-11 Hall-A Information is from [Wikia](http://va11halla.wikia.com/wiki/VA-11_HALL-A_Wikia)  
 
