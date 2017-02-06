@@ -142,7 +142,7 @@ This cog uses:
 - datetime
 - time.sleep
 - [BeautifulSoup4](https://www.crummy.com/software/BeautifulSoup/)
-- requests
+- [requests](http://docs.python-requests.org/en/master/)
 
 ### Sources
 All VA-11 Hall-A Information is from [Wikia](http://va11halla.wikia.com/wiki/VA-11_HALL-A_Wikia)  
