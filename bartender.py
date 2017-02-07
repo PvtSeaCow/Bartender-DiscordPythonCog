@@ -455,10 +455,12 @@ class Work(object):
             return "0 mins "
         diff = future - now
         seconds = diff.total_seconds()
-        if float(seconds/3600) < 1.0:
-            return str(seconds/(3600*60))+" mins "
+        m, s = divmod(seconds, 60)
+        hours, minutes = divmod(m, 60)
+        if float(hours) < 1.0:
+            return str(minutes)+" mins "
         else:
-            return str(int(seconds/3600)+1)+" hours "
+            return "{} hours and {} mins ".format(str(int(hours)), str(int(minutes)))
 
     def can_work(self):
         now = datetime.datetime.utcnow()
