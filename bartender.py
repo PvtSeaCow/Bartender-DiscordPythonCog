@@ -56,7 +56,7 @@ class bartender:
         with open(path, "w") as f:
             json.dump(dic, f)
 
-    @commands.group(invoke_without_command=True, pass_context=True, checks=utils.is_not_default_channel)
+    @commands.group(invoke_without_command=True, pass_context=True)
     async def bar(self, ctx):
         """Relax in our cyberpunk bar. Order drinks or make friends. (Is the central hub for all commands)"""
         a = account(ctx.message.author)
