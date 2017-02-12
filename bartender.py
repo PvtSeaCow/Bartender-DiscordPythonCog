@@ -8,6 +8,7 @@ import datetime
 from time import sleep
 from bs4 import BeautifulSoup
 import requests
+from ctypes.util import find_library
 
 class bartender:
     """Welcome to the Bar!"""
@@ -55,9 +56,9 @@ class bartender:
         with open(path, "w") as f:
             json.dump(dic, f)
 
-    @commands.group(invoke_without_command=True, pass_context=True)
+    @commands.group(invoke_without_command=True, pass_context=True, checks=utils.is_not_default_channel)
     async def bar(self, ctx):
-        """Relax in our cyberpunk bar. Order drinks or make friends. (Has many subcommands)"""
+        """Relax in our cyberpunk bar. Order drinks or make friends. (Is the central hub for all commands)"""
         a = account(ctx.message.author)
         path = a.fpath
         with open(path) as f:
@@ -92,7 +93,7 @@ class bartender:
         await self.bot.say(embed=embed)
         pass
 
-    @bar.command(pass_context=True)
+    @bar.group(invoke_without_command=True, pass_context=True)
     async def order(self, ctx, *, drinkType : str = "random"):
         """Orders drinks"""
         member = ctx.message.author
@@ -148,9 +149,7 @@ class bartender:
                 bought_text = "\"I'm not giving this drink out for free.\""
             if a.can_buy(dprice):
                 original_amount = a.amount
-                a.buy(dprice)
-                a = account(member)
-                new_amount = a.amount
+                new_amount = int(a.amount) - int(dprice)
                 bought_text = qdrink
 
             embed = discord.Embed(title=discord.Embed.Empty, color=self.embed_color)
@@ -167,18 +166,63 @@ class bartender:
             embed.set_author(name="Drink Requested: "+rawdrink.title(), url=url, icon_url=icon)
             embed.set_thumbnail(url=self.embed_footer_icon)
             if not a.can_buy(dprice):
-                embed.add_field(name="Drink Not Bought!", value="You lack the required funds for this drink! You need ${} more!".format(int(int(dprice) - int(account(member).amount))), inline=False)
+                embed.add_field(name="You Cannot Buy the Drink!", value="You lack the required funds for this drink! You need ${} more!".format(int(int(dprice) - int(account(member).amount))), inline=False)
             if a.can_buy(dprice):
-                embed.add_field(name="Drink Bought!", value="Money has been deducted from your account!\nYour Original Tab Amount: ${}\nAmount that has been deducted: ${}\nYour New Tab Amount: ${}".format(original_amount, dprice, new_amount), inline=False)
+                embed.add_field(name="You Can Buy the Drink!", value="Money will be deducted from your account!\nYour current Tab Amount: ${}\nAmount that'll be deducted: ${}\nTab Amount After Purchase: ${}".format(original_amount, dprice, new_amount), inline=False)
+                embed.add_field(name="Would you like to Buy?", value="Type `Yes` to Purchase, `No` to cancel, or `For <User>` to give the drink to that member.", inline=False)
             embed.add_field(name="Flavor:", value=dflavor, inline=True)
             embed.add_field(name="Type:", value=dtype, inline=True)
             embed.add_field(name="Price:", value="$"+dprice, inline=True)
-            #embed.add_field(name="Bought?:", value=str(account(ctx.message.author).can_buy(dprice)), inline=True)
             embed.add_field(name="Techniques:", value=str(", ".join(dtech)).title(), inline=True)
             embed.add_field(name="Description:", value=ddesc, inline=False)
-            embed.set_footer(text=bought_text)
-            await self.bot.say(embed=embed)
-            #await self.bot.say("Drink: {}\nFlavor: {}\nType: {}\nPrice: ${}\nTechniques: {}".format(name, dflavor, dtype, dprice, ", ".join(dtech)))
+            embedmsg = await self.bot.say(embed=embed)
+            if not a.can_buy(dprice):
+                return
+            while True:
+                msg = await self.bot.wait_for_message(timeout=7.5, channel=ctx.message.channel, author=ctx.message.author)
+                if msg == None:
+                    yes = None
+                    break
+                elif msg.content.lower() in ["yes","y","yea","yeah"]:
+                    yes = True
+                    break
+                elif msg.content.lower() in ["no","n","nah","nope"]:
+                    yes = False
+                    break
+                elif msg.content.lower().startswith("for") and msg.mentions and len(msg.mentions) >= 1:
+                    mentions = msg.mentions
+                    yes = -1
+                elif msg.mentions and len(msg.mentions) == 0:
+                    await self.bot.say("\"You need to tell me who you want to give it to!\"")
+                else:
+                    pass
+
+            if yes == True:
+                if a.can_buy(dprice):
+                    a.buy(dprice)
+                    name = "You Bought the Drink!"
+                    value = "Money has been deducted from your account!\nYour Original Tab Amount: ${0}\nAmount that has been deducted: ${1}\nYour New Tab Amount: ${2}".format(original_amount, dprice, new_amount)
+                else:
+                    return
+            elif yes == False:
+                name = "You canceled the order!"
+                value = "Your order has been canceled and you will not be charged."
+            elif yes == None:
+                name = "Order Canceled!"
+                value = "You took too long to answer, so I canceled the order. You will not be charged."
+            elif yes == -1 and len(mentions) != 0:
+                purchase_amount = dprice*len(mentions)
+                a.buy(purchase_amount)
+                name = "You bought a drink for `{}`!".format(", ".join([m.display_name for m in mentions]))
+                value = "Money has been deducted from your account!\nYour Original Tab Amount: ${0}\nAmount that has been deducted: ${1}\nYour New Tab Amount: ${2}".format(original_amount, dprice, new_amount-(purchase_amount))
+                if len(mentions) > 1:
+                    value = "You have been charged for each drink towards the each member\n"+value
+            else:
+                return
+
+            embed.set_field_at(0, name=name, value=value, inline=False)
+            embed.remove_field(1)
+            await self.bot.edit_message(embedmsg, embed=embed)
 
     @bar.command(name="info", pass_context=True)
     async def drink_info(self, ctx, *, drink):
@@ -219,6 +263,9 @@ class bartender:
             name = rawdrink.lower().title()
             ddesc = drink["Description"]
             dtype = drink["Type"]
+            dspecial = None
+            if dtype == "Special":
+                dspecial = drink["Special"]
             dflavor = drink["Flavor"]
             dtech = drink["Techniques"]
             dprice = drink["Price"]
@@ -232,11 +279,12 @@ class bartender:
                     icon = ""
                 except:
                     raise
-
             embed = discord.Embed(title="Info for drink: {0}".format(rawdrink.title()), url=url, color=self.embed_color, description="*{}*".format(ddesc))
             embed.set_thumbnail(url=icon)
             embed.add_field(name="Flavor:", value=dflavor, inline=True)
             embed.add_field(name="Type:", value=dtype, inline=True)
+            if dspecial:
+                embed.add_field(name="Special:", value=dspecial, inline=True)
             embed.add_field(name="Price:", value="$"+dprice, inline=True)
             #embed.add_field(name="Can You Buy?:", value=str(account(ctx.message.author).can_buy(dprice)), inline=True)
             embed.add_field(name="Techniques:", value=str(", ".join(dtech)).title(), inline=True)
@@ -351,6 +399,7 @@ class bartender:
                         embed.description = "Nice job!"+(" Hey, go buy something nice. (+$500)" if boss_likes else "")
                         embed.add_field(name="Hours Worked:", value="{} hours".format(hours), inline=True)
                         embed.add_field(name="Money Earned:", value="${}".format(amount)+(" (+$500 for a job well done)" if boss_likes else ""), inline=True)
+                        embed.add_field(name="You can work again in:", value="{} hours".format(str(24 + hours)))
                         await self.bot.edit_message(embedmsg, embed=embed)
                     else:
                         await self.bot.delete_message(embedmsg)
@@ -537,8 +586,18 @@ class utils(object):
             return True
         return False
 
+    @classmethod
     def is_owner():
         return commands.check(lambda ctx: is_owner_check(ctx.message))
+
+    def is_default_channel(channel):
+        if channel == channel.server.default_channel:
+            return True
+        return False
+
+    @classmethod
+    def is_not_default_channel():
+        return commands.check(lambda ctx: not is_default_channel(ctx.message.channel))
 
 # Don't Mind this mess, its so I dont have to ship default files with the cog. AKA So the code can make the files.
 
