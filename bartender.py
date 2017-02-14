@@ -10,6 +10,33 @@ from bs4 import BeautifulSoup
 import requests
 from ctypes.util import find_library
 
+class utils:
+    def get_drink_icon(drink):
+        drink = drink.replace(" ", "_").title()
+        page = requests.get("http://va11halla.wikia.com/wiki/"+drink)
+        if page.status_code == 200:
+            soup = BeautifulSoup(page.text)
+            element = soup.find('img', {"class":"pi-image-thumbnail"})
+            url = element["src"]
+            return url
+        return None
+
+    def is_owner_check(message):
+        if message.author.id == "105800900521570304":
+            return True
+        return False
+
+    def is_owner():
+        return commands.check(lambda ctx: is_owner_check(ctx.message))
+
+    def is_default_channel(channel):
+        if channel == channel.server.default_channel:
+            return True
+        return False
+
+    def is_not_default_channel():
+        return commands.check(lambda ctx: is_default_channel(ctx.message.channel))
+
 class bartender:
     """Welcome to the Bar!"""
     def __init__(self, bot):
@@ -97,6 +124,11 @@ class bartender:
     async def order(self, ctx, *, drinkType : str = "random"):
         """Orders drinks"""
         member = ctx.message.author
+        if drinkType.lower() != "random":
+            alllists = list([str(drink) for drink in self.drinks])
+            matching = [s for s in alllists if drinkType.title() in s]
+            if len(matching) > 0:
+                drinkType = matching[0]
         if drinkType.title() in self.drinks:
             type_of_drink = "specific"
         elif drinkType.title() in self.flavors:
@@ -179,7 +211,7 @@ class bartender:
             if not a.can_buy(dprice):
                 return
             while True:
-                msg = await self.bot.wait_for_message(timeout=7.5, channel=ctx.message.channel, author=ctx.message.author)
+                msg = await self.bot.wait_for_message(timeout=30, channel=ctx.message.channel, author=ctx.message.author)
                 if msg == None:
                     yes = None
                     break
@@ -189,11 +221,13 @@ class bartender:
                 elif msg.content.lower() in ["no","n","nah","nope"]:
                     yes = False
                     break
-                elif msg.content.lower().startswith("for") and msg.mentions and len(msg.mentions) >= 1:
+                elif msg.content.lower().startswith("for") and msg.mentions:
                     mentions = msg.mentions
                     yes = -1
-                elif msg.mentions and len(msg.mentions) == 0:
+                    break
+                elif msg.content.lower().startswith("for") and not msg.mentions:
                     await self.bot.say("\"You need to tell me who you want to give it to!\"")
+                    pass
                 else:
                     pass
 
@@ -211,12 +245,13 @@ class bartender:
                 name = "Order Canceled!"
                 value = "You took too long to answer, so I canceled the order. You will not be charged."
             elif yes == -1 and len(mentions) != 0:
-                purchase_amount = dprice*len(mentions)
-                a.buy(purchase_amount)
-                name = "You bought a drink for `{}`!".format(", ".join([m.display_name for m in mentions]))
-                value = "Money has been deducted from your account!\nYour Original Tab Amount: ${0}\nAmount that has been deducted: ${1}\nYour New Tab Amount: ${2}".format(original_amount, dprice, new_amount-(purchase_amount))
-                if len(mentions) > 1:
-                    value = "You have been charged for each drink towards the each member\n"+value
+                purchase_amount = int(int(dprice)*len(mentions))
+                if a.can_buy(purchase_amount):
+                    a.buy(purchase_amount)
+                    name = "You bought a drink for `{}`!".format(", ".join([m.display_name for m in mentions]))
+                    value = "Money has been deducted from your account!\nYour Original Tab Amount: ${0}\nAmount that has been deducted: ${1}\nYour New Tab Amount: ${2}".format(original_amount, purchase_amount, original_amount-int(purchase_amount))
+                    if len(mentions) > 1:
+                        value = "You have been charged for each drink towards the each member\n"+value
             else:
                 return
 
@@ -227,6 +262,11 @@ class bartender:
     @bar.command(name="info", pass_context=True)
     async def drink_info(self, ctx, *, drink):
         """Don't know about a drink. Get info about it here."""
+        if drink.lower() != "random":
+            alllists = list([str(drink) for drink in self.drinks])
+            matching = [s for s in alllists if drink.title() in s]
+            if len(matching) > 0:
+                drink = matching[0]
         if drink.title() in self.drinks:
             type_of_drink = "specific"
         elif drink.title() in self.flavors:
@@ -427,6 +467,10 @@ class account(object):
         with open(self.fpath) as f:
             self.data = json.load(f)
         self.amount = int(self.data["money"])
+        if self.amount < 0:
+            self.data["money"] = "0"
+            with open(self.fpath) as f:
+                json.dump(self.data, f)
         self.firsttime = bool(self.data["firsttime"])
 
     def make_tab_account(self):
@@ -568,36 +612,6 @@ class Work(object):
         with open(self.fpath, "w") as f:
             json.dump(data, f)
         return True
-
-class utils(object):
-    @classmethod
-    def get_drink_icon(self, drink):
-        drink = drink.replace(" ", "_").title()
-        page = requests.get("http://va11halla.wikia.com/wiki/"+drink)
-        if page.status_code == 200:
-            soup = BeautifulSoup(page.text)
-            element = soup.find('img', {"class":"pi-image-thumbnail"})
-            url = element["src"]
-            return url
-        return None
-
-    def is_owner_check(message):
-        if message.author.id == "105800900521570304":
-            return True
-        return False
-
-    @classmethod
-    def is_owner():
-        return commands.check(lambda ctx: is_owner_check(ctx.message))
-
-    def is_default_channel(channel):
-        if channel == channel.server.default_channel:
-            return True
-        return False
-
-    @classmethod
-    def is_not_default_channel():
-        return commands.check(lambda ctx: not is_default_channel(ctx.message.channel))
 
 # Don't Mind this mess, its so I dont have to ship default files with the cog. AKA So the code can make the files.
 
