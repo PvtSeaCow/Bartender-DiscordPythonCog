@@ -468,9 +468,8 @@ class account(object):
             self.data = json.load(f)
         self.amount = int(self.data["money"])
         if self.amount < 0:
-            self.data["money"] = "0"
-            with open(self.fpath) as f:
-                json.dump(self.data, f)
+            self.set(0)
+            self.amount = int(self.data["money"])
         self.firsttime = bool(self.data["firsttime"])
 
     def make_tab_account(self):
@@ -519,6 +518,12 @@ class account(object):
     def add(self, price : int):
         data = self.data
         data["money"] = str(int(data["money"]) + int(price))
+        with open(self.fpath, "w") as e:
+            json.dump(data, e)
+
+    def set(self, price : int):
+        data = self.data
+        data["money"] = str(price)
         with open(self.fpath, "w") as e:
             json.dump(data, e)
 
