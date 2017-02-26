@@ -32,7 +32,10 @@ You can order:
 - Or a random drink in general
  - `<prefix>bar order`
 
-When you order the drink, Jill will tell you if you purchased the drink, along with info about the drink.
+When you order the drink, Jill will ask if you want to purchased the drink, along with info about the drink.  
+Apon answering 'Yes', Jill will give you the drink and money will be deducted.  
+Apon answering 'No', the order will be cancelled.  
+Not answering will cause Jill to cancel the order. (Timeout is 8 seconds)
  
 ## Getting Info on a drink
 Using the same parameters as ordering, it just shows you info without buying the drink.
