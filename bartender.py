@@ -413,7 +413,7 @@ class bartender:
                 minwage = work.workdata[item]["minwage"]
                 embed.add_field(name="Description:", value=desc, inline=False)
                 embed.add_field(name="Min/Max Hours:", value="{}/{}".format(minhours, maxhours), inline=True)
-                embed.add_field(name="Minimum Wage:", value=minwage, inline=True)
+                embed.add_field(name="Minimum Wage:", value="$"+minwage, inline=True)
                 embedmsg = await self.bot.say(embed=embed)
                 while True:
                     msg = await self.bot.wait_for_message(timeout=5.0, channel=ctx.message.channel, author=ctx.message.author)
