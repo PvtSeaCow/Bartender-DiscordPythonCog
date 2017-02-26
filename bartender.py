@@ -416,7 +416,7 @@ class bartender:
                 embed.add_field(name="Minimum Wage:", value="$"+minwage, inline=True)
                 embedmsg = await self.bot.say(embed=embed)
                 while True:
-                    msg = await self.bot.wait_for_message(timeout=5.0, channel=ctx.message.channel, author=ctx.message.author)
+                    msg = await self.bot.wait_for_message(timeout=8.0, channel=ctx.message.channel, author=ctx.message.author)
                     if msg == None:
                         yes = None
                         break
